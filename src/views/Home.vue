@@ -35,7 +35,7 @@
                 @click="doneEdit({ ...todo, completed: !todo.completed })"
               />
               <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
-              <button class="destroy" @click="removeTodo(todo)"></button>
+              <!-- <button class="destroy" @click="removeTodo(todo)"></button> -->
             </div>
             <input
               class="edit"
@@ -76,13 +76,13 @@
             >
           </li>
         </ul>
-        <button
+        <!-- <button
           class="clear-completed"
           @click="removeCompleted"
           v-show="todos.length > remaining"
         >
           Clear completed
-        </button>
+        </button> -->
       </footer>
     </section>
   </div>
