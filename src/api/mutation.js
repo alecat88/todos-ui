@@ -22,3 +22,14 @@ export const UPDATE_TODO = gql`
     }
   }
 `;
+export const DELETE_TODO = gql`
+  mutation($id: String!) {
+    todoMutation {
+      deleteTodo(id: $id) {
+        id
+        title
+        completed
+      }
+    }
+  }
+`;

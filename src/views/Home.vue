@@ -13,12 +13,12 @@
         />
       </header>
       <section class="main" v-show="todos.length" v-cloak>
-        <!-- <input
+        <input
           id="toggle-all"
           class="toggle-all"
           type="checkbox"
           v-model="allDone"
-        /> -->
+        />
         <label for="toggle-all"></label>
         <ul class="todo-list">
           <li
@@ -35,7 +35,7 @@
                 @click="doneEdit({ ...todo, completed: !todo.completed })"
               />
               <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
-              <!-- <button class="destroy" @click="removeTodo(todo)"></button> -->
+              <button class="destroy" @click="removeTodo(todo)"></button>
             </div>
             <input
               class="edit"
@@ -76,33 +76,33 @@
             >
           </li>
         </ul>
-        <!-- <button
+        <button
           class="clear-completed"
           @click="removeCompleted"
           v-show="todos.length > remaining"
         >
           Clear completed
-        </button> -->
+        </button>
       </footer>
     </section>
   </div>
 </template>
 
 <script>
-var STORAGE_KEY = "todos-vuejs-2.0";
-var todoStorage = {
-  fetch: function() {
-    var todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    todos.forEach(function(todo, index) {
-      todo.id = index;
-    });
-    todoStorage.uid = todos.length;
-    return todos;
-  },
-  save: function(todos) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-  }
-};
+// var STORAGE_KEY = "todos-vuejs-2.0";
+// var todoStorage = {
+//   fetch: function() {
+//     var todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+//     todos.forEach(function(todo, index) {
+//       todo.id = index;
+//     });
+//     todoStorage.uid = todos.length;
+//     return todos;
+//   },
+//   save: function(todos) {
+//     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+//   }
+// };
 
 // visibility filters
 var filters = {
@@ -122,7 +122,7 @@ var filters = {
 };
 
 import { GET_TODOS } from "@/api/query";
-import { CREATE_TODO, UPDATE_TODO } from "@/api/mutation";
+import { CREATE_TODO, UPDATE_TODO, DELETE_TODO } from "@/api/mutation";
 // import { CREATE_TODO } from "@/api/mutation";
 
 export default {
@@ -162,8 +162,9 @@ export default {
         return this.remaining === 0;
       },
       set: function(value) {
-        this.todos.forEach(function(todo) {
+        this.todos.forEach(todo => {
           todo.completed = value;
+          this.doneEdit({ ...todo, completed: value });
         });
       }
     }
@@ -202,7 +203,16 @@ export default {
     },
 
     removeTodo: function(todo) {
-      this.todos.splice(this.todos.indexOf(todo), 1);
+      this.$apollo
+        .mutate({
+          mutation: DELETE_TODO,
+          variables: {
+            id: todo.id
+          }
+        })
+        .then(() => {
+          this.todos.splice(this.todos.indexOf(todo), 1);
+        });
     },
 
     editTodo: function(todo) {
@@ -241,6 +251,9 @@ export default {
     },
 
     removeCompleted: function() {
+      this.todos
+        .filter(todo => todo.completed === true)
+        .forEach(todo => this.removeTodo(todo));
       this.todos = filters.active(this.todos);
     }
   },
